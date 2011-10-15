@@ -67,7 +67,6 @@ config CGROUP_BFQIO
 
 config IOSCHED_SIO
   	tristate "Simple I/O scheduler"
-  	default y
   	---help---
     	  The Simple I/O scheduler is an extremely simple scheduler,
     	  based on noop and deadline, that relies on deadlines to
