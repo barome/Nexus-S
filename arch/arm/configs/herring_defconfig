@@ -1,7 +1,11 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.35.14
+<<<<<<< HEAD
 # Sun Oct 16 06:08:20 2011
+=======
+# Tue Oct 11 11:31:59 2011
+>>>>>>> parent of d7c8d76... initial bln support (v4) from Neldar
 #
 CONFIG_ARM=y
 CONFIG_HAVE_PWM=y
@@ -994,6 +998,7 @@ CONFIG_USB_SWITCH_FSA9480=y
 # CONFIG_IWMC3200TOP is not set
 CONFIG_SAMSUNG_MODEMCTL=y
 CONFIG_PN544=y
+CONFIG_GENERIC_BLN=y
 CONFIG_BLD=y
 CONFIG_SCREEN_DIMMER=y
 CONFIG_TOUCH_WAKE=y
@@ -1140,7 +1145,6 @@ CONFIG_KEYBOARD_ATKBD=y
 # CONFIG_KEYBOARD_SUNKBD is not set
 # CONFIG_KEYBOARD_XTKBD is not set
 CONFIG_KEYPAD_CYPRESS_TOUCH=y
-CONFIG_KEYPAD_CYPRESS_TOUCH_USE_BLN=y
 # CONFIG_INPUT_MOUSE is not set
 # CONFIG_INPUT_JOYSTICK is not set
 # CONFIG_INPUT_TABLET is not set
