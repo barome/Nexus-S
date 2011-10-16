@@ -15,6 +15,7 @@
 #include <linux/init.h>
 #include <linux/gpio.h>
 #include <linux/earlysuspend.h>
+#include <linux/bln.h>
 #include <asm/mach-types.h>
 
 #ifdef CONFIG_BLD
@@ -32,6 +33,23 @@ static void herring_touchkey_led_onoff(int onoff)
 	for (i = 0; i < ARRAY_SIZE(led_gpios); i++)
 		gpio_direction_output(S5PV210_GPJ3(led_gpios[i]), !!onoff);
 }
+
+#ifdef CONFIG_GENERIC_BLN
+static void herring_touchkey_bln_enable(void)
+{
+	herring_touchkey_led_onoff(1);
+}
+
+static void herring_touchkey_bln_disable(void)
+{
+	herring_touchkey_led_onoff(0);
+}
+
+static struct bln_implementation herring_touchkey_bln = {
+	.enable = herring_touchkey_bln_enable,
+	.disable = herring_touchkey_bln_disable,
+};
+#endif
 
 #ifdef CONFIG_BLD
 static void herring_touchkey_bld_enable(void)
@@ -91,6 +109,10 @@ static int __init herring_init_touchkey_led(void)
 	herring_touchkey_led_onoff(1);
 
 	register_early_suspend(&early_suspend);
+
+#ifdef CONFIG_GENERIC_BLN
+	register_bln_implementation(&herring_touchkey_bln);
+#endif
 
 #ifdef CONFIG_BLD
 	register_bld_implementation(&herring_touchkey_bld);
