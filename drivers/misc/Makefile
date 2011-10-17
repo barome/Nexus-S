@@ -48,3 +48,9 @@ obj-$(CONFIG_GENERIC_BLN) += bln.o
 obj-$(CONFIG_BLD) += bld.o
 obj-$(CONFIG_SCREEN_DIMMER) += screen_dimmer.o
 obj-$(CONFIG_TOUCH_WAKE) += touch_wake.o
+<<<<<<< HEAD
+=======
+obj-$(CONFIG_BLX) += blx.o
+obj-$(CONFIG_LIVE_OC) += live_oc.o
+obj-$(CONFIG_CPU_DIDLE) += deep_idle.o
+>>>>>>> 945d2b9... Added sysfs interface for enabling/disabling the use of the DEEP
