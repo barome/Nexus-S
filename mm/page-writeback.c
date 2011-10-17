@@ -426,11 +426,7 @@ get_dirty_limits(unsigned long *pbackground, unsigned long *pdirty,
 	struct task_struct *tsk;
 
 	if (!vm_dirty_bytes || !dirty_background_bytes)
-<<<<<<< HEAD
     		available_memory = determine_dirtyable_memory();
-=======
-		available_memory = determine_dirtyable_memory();
->>>>>>> 0c4e37a... [PATCH] writeback: avoid unnecessary determine_dirtyable_memory call
 
 	if (vm_dirty_bytes)
 		dirty = DIV_ROUND_UP(vm_dirty_bytes, PAGE_SIZE);
