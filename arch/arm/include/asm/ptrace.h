@@ -184,11 +184,11 @@ static inline int valid_user_regs(struct pt_regs *regs)
 
 #define instruction_pointer(regs)	(regs)->ARM_pc
 
-#ifdef CONFIG_SMP
-extern unsigned long profile_pc(struct pt_regs *regs);
-#else
+//#ifdef CONFIG_SMP
+//extern unsigned long profile_pc(struct pt_regs *regs);
+//#else
 #define profile_pc(regs) instruction_pointer(regs)
-#endif
+//#endif
 
 #define predicate(x)		((x) & 0xf0000000)
 #define PREDICATE_ALWAYS	0xe0000000
