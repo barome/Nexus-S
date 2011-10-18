@@ -771,13 +771,8 @@ static cycle_t logarithmic_accumulation(cycle_t offset, int shift)
 	/* Accumulate error between NTP and clock interval */
 	timekeeper.ntp_error += tick_length << shift;
 	timekeeper.ntp_error -= 
-<<<<<<< HEAD
-		(timekeeper.xtime_interval + timekeeper.xtime_remainder) <<
-				(timekeeper.ntp_error_shift + shift);
-=======
-    		(timekeeper.xtime_interval + timekeeper.xtime_remainder) <<
-      			(timekeeper.ntp_error_shift + shift);
->>>>>>> b7f032c... time: Compensate for rounding on odd-frequency clocksources
+        (timekeeper.xtime_interval + timekeeper.xtime_remainder) <<
+            (timekeeper.ntp_error_shift + shift);
 
 	return offset;
 }
