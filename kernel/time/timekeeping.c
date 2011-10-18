@@ -74,7 +74,6 @@ static void timekeeper_setup_internals(struct clocksource *clock)
 	tmp <<= clock->shift;
 	ntpinterval = tmp;
 	tmp += clock->mult/2;
-	ntpinterval = tmp;
 	do_div(tmp, clock->mult);
 	if (tmp == 0)
 		tmp = 1;
@@ -771,8 +770,13 @@ static cycle_t logarithmic_accumulation(cycle_t offset, int shift)
 	/* Accumulate error between NTP and clock interval */
 	timekeeper.ntp_error += tick_length << shift;
 	timekeeper.ntp_error -= 
+<<<<<<< HEAD
         (timekeeper.xtime_interval + timekeeper.xtime_remainder) <<
             (timekeeper.ntp_error_shift + shift);
+=======
+		(timekeeper.xtime_interval + timekeeper.xtime_remainder) <<
+				(timekeeper.ntp_error_shift + shift);
+>>>>>>> parent of b62bdbb... time: Compensate for rounding on odd-frequency clocksources
 
 	return offset;
 }
