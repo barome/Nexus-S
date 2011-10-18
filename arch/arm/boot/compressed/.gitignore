@@ -3,3 +3,5 @@ piggy.gz
 vmlinux.lds
 piggy.xzkern
 vmlinux
+ashldi3.S
+lib1funcs.S
