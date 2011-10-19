@@ -1426,7 +1426,6 @@ static void shrink_active_list(unsigned long nr_pages, struct zone *zone,
 	spin_unlock_irq(&zone->lru_lock);
 }
 
-#ifdef CONFIG_SWAP
 static int inactive_anon_is_low_global(struct zone *zone)
 {
 	unsigned long active, inactive;
@@ -1452,26 +1451,12 @@ static int inactive_anon_is_low(struct zone *zone, struct scan_control *sc)
 {
 	int low;
 
-	/*
-	 * If we don't have swap space, anonymous page deactivation
-	 * is pointless.
-	 */
-	if (!total_swap_pages)
-		return 0;
-
 	if (scanning_global_lru(sc))
 		low = inactive_anon_is_low_global(zone);
 	else
 		low = mem_cgroup_inactive_anon_is_low(sc->mem_cgroup);
 	return low;
 }
-#else
-static inline int inactive_anon_is_low(struct zone *zone,
-					struct scan_control *sc)
-{
-	return 0;
-}
-#endif
 
 static int inactive_file_is_low_global(struct zone *zone)
 {
@@ -1719,7 +1704,7 @@ static void shrink_zone(int priority, struct zone *zone,
 	 * Even if we did not try to evict anon pages at all, we want to
 	 * rebalance the anon lru active/inactive ratio.
 	 */
-	if (inactive_anon_is_low(zone, sc))
+	if (inactive_anon_is_low(zone, sc) && nr_swap_pages > 0)
 		shrink_active_list(SWAP_CLUSTER_MAX, zone, sc, priority, 0);
 
 	throttle_vm_writeout(sc->gfp_mask);
@@ -2495,37 +2480,6 @@ static int __devinit cpu_callback(struct notifier_block *nfb,
 }
 
 /*
-<<<<<<< HEAD
- * We wake up kswapd every WT_EXPIRY till free ram is above pages_lots
- */
-static void watermark_wakeup(unsigned long data)
-{
-  pg_data_t *pgdat = (pg_data_t *)data;
-  struct timer_list *wt = &pgdat->watermark_timer;
-  int i;
-
-  if (!waitqueue_active(&pgdat->kswapd_wait))
-    goto out;
-  for (i = pgdat->nr_zones - 1; i >= 0; i--) {
-    struct zone *z = pgdat->node_zones + i;
-
-    if (!populated_zone(z) || is_highmem(z)) {
-      /* We are better off leaving highmem full */
-      continue;
-    }
-    if (!zone_watermark_ok(z, 0, lots_wmark_pages(z), 0, 0)) {
-      wake_up_interruptible(&pgdat->kswapd_wait);
-      goto out;
-    }
-  }
-out:
-  mod_timer(wt, jiffies + WT_EXPIRY);
-  return;
-}
-
-/*
-=======
->>>>>>> parent of d46d547... Ck2 patch
  * This kswapd start function will be called by init and node-hot-add.
  * On node-hot-add, kswapd will moved to proper cpus if cpus are hot-added.
  */
@@ -3020,4 +2974,3 @@ void scan_unevictable_unregister_node(struct node *node)
 {
 	sysdev_remove_file(&node->sysdev, &attr_scan_unevictable_pages);
 }
-
