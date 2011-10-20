@@ -10,10 +10,10 @@
 #include <linux/gfp.h>
 #include <linux/workqueue.h>
 #include <linux/kobject.h>
-#include <linux/rcu_types.h>
 #include <linux/mm_types.h>
 #include <linux/kernel.h>
-#include <linux/kobject.h>
+
+#define SLAB_NUMA		0x00000001UL    /* shortcut */
 
 enum stat_item {
 	ALLOC,			/* Allocation count */
@@ -37,8 +37,9 @@ enum stat_item {
  * Singly-linked list with head, tail, and nr
  */
 struct kmlist {
-	unsigned long nr;
-	void **head, **tail;
+	unsigned long	nr;
+	void 		**head;
+	void		**tail;
 };
 
 /*
@@ -46,8 +47,8 @@ struct kmlist {
  * objects can be returned to the kmem_cache_list from remote CPUs.
  */
 struct kmem_cache_remote_free {
-	spinlock_t lock;
-	struct kmlist list;
+	spinlock_t	lock;
+	struct kmlist	list;
 } ____cacheline_aligned;
 
 /*
@@ -56,18 +57,26 @@ struct kmem_cache_remote_free {
  * kmem_cache_lists allow off-node allocations (but require locking).
  */
 struct kmem_cache_list {
-	struct kmlist freelist;	/* Fastpath LIFO freelist of objects */
+				/* Fastpath LIFO freelist of objects */
+	struct kmlist		freelist;
 #ifdef CONFIG_SMP
-	int remote_free_check;	/* remote_free has reached a watermark */
+				/* remote_free has reached a watermark */
+	int			remote_free_check;
 #endif
-	struct kmem_cache *cache; /* kmem_cache corresponding to this list */
+				/* kmem_cache corresponding to this list */
+	struct kmem_cache	*cache;
 
-	unsigned long nr_partial; /* Number of partial slabs (pages) */
-	struct list_head partial; /* Slabs which have some free objects */
+				/* Number of partial slabs (pages) */
+	unsigned long		nr_partial;
 
-	unsigned long nr_slabs;	/* Total number of slabs allocated */
+				/* Slabs which have some free objects */
+	struct list_head	partial;
 
-	//struct list_head full;
+				/* Total number of slabs allocated */
+	unsigned long		nr_slabs;
+
+				/* Protects nr_partial, nr_slabs, and partial */
+	spinlock_t		page_lock;
 
 #ifdef CONFIG_SMP
 	/*
@@ -79,7 +88,7 @@ struct kmem_cache_list {
 #endif
 
 #ifdef CONFIG_SLQB_STATS
-	unsigned long stats[NR_SLQB_STAT_ITEMS];
+	unsigned long		stats[NR_SLQB_STAT_ITEMS];
 #endif
 } ____cacheline_aligned;
 
@@ -87,9 +96,8 @@ struct kmem_cache_list {
  * Primary per-cpu, per-kmem_cache structure.
  */
 struct kmem_cache_cpu {
-	struct kmem_cache_list list; /* List for node-local slabs. */
-
-	unsigned int colour_next;
+	struct kmem_cache_list	list;		/* List for node-local slabs */
+	unsigned int		colour_next;	/* Next colour offset to use */
 
 #ifdef CONFIG_SMP
 	/*
@@ -101,55 +109,56 @@ struct kmem_cache_cpu {
 	 * An NR_CPUS or MAX_NUMNODES array would be nice here, but then we
 	 * get to O(NR_CPUS^2) memory consumption situation.
 	 */
-	struct kmlist rlist;
-	struct kmem_cache_list *remote_cache_list;
+	struct kmlist		rlist;
+	struct kmem_cache_list	*remote_cache_list;
 #endif
-} ____cacheline_aligned;
+} ____cacheline_aligned_in_smp;
 
 /*
- * Per-node, per-kmem_cache structure.
+ * Per-node, per-kmem_cache structure. Used for node-specific allocations.
  */
 struct kmem_cache_node {
-	struct kmem_cache_list list;
-	spinlock_t list_lock; /* protects access to list */
+	struct kmem_cache_list	list;
+	spinlock_t		list_lock;	/* protects access to list */
 } ____cacheline_aligned;
 
 /*
  * Management object for a slab cache.
  */
 struct kmem_cache {
-	unsigned long flags;
-	int hiwater;		/* LIFO list high watermark */
-	int freebatch;		/* LIFO freelist batch flush size */
-	int objsize;		/* The size of an object without meta data */
-	int offset;		/* Free pointer offset. */
-	int objects;		/* Number of objects in slab */
+	unsigned long	flags;
+	int		hiwater;	/* LIFO list high watermark */
+	int		freebatch;	/* LIFO freelist batch flush size */
+#ifdef CONFIG_SMP
+	struct kmem_cache_cpu	**cpu_slab; /* dynamic per-cpu structures */
+#else
+	struct kmem_cache_cpu	cpu_slab;
+#endif
+	int		objsize;	/* Size of object without meta data */
+	int		offset;		/* Free pointer offset. */
+	int		objects;	/* Number of objects in slab */
 
-	int size;		/* The size of an object including meta data */
-	int order;		/* Allocation order */
-	gfp_t allocflags;	/* gfp flags to use on allocation */
-	unsigned int colour_range;	/* range of colour counter */
-	unsigned int colour_off;		/* offset per colour */
-	void (*ctor)(void *);
+#ifdef CONFIG_NUMA
+	struct kmem_cache_node	**node_slab; /* dynamic per-node structures */
+#endif
 
-	const char *name;	/* Name (only for display!) */
-	struct list_head list;	/* List of slab caches */
+	int		size;		/* Size of object including meta data */
+	int		order;		/* Allocation order */
+	gfp_t		allocflags;	/* gfp flags to use on allocation */
+	unsigned int	colour_range;	/* range of colour counter */
+	unsigned int	colour_off;	/* offset per colour */
+	void		(*ctor)(void *);
 
-	int align;		/* Alignment */
-	int inuse;		/* Offset to metadata */
+	const char	*name;		/* Name (only for display!) */
+	struct list_head list;		/* List of slab caches */
+
+	int		align;		/* Alignment */
+	int		inuse;		/* Offset to metadata */
 
 #ifdef CONFIG_SLQB_SYSFS
-	struct kobject kobj;	/* For sysfs */
+	struct kobject	kobj;		/* For sysfs */
 #endif
-#ifdef CONFIG_NUMA
-	struct kmem_cache_node *node[MAX_NUMNODES];
-#endif
-#ifdef CONFIG_SMP
-	struct kmem_cache_cpu *cpu_slab[NR_CPUS];
-#else
-	struct kmem_cache_cpu cpu_slab;
-#endif
-};
+} ____cacheline_aligned;
 
 /*
  * Kmalloc subsystem.
@@ -161,7 +170,8 @@ struct kmem_cache {
 #endif
 
 #define KMALLOC_SHIFT_LOW ilog2(KMALLOC_MIN_SIZE)
-#define KMALLOC_SHIFT_SLQB_HIGH (PAGE_SHIFT + 9)
+#define KMALLOC_SHIFT_SLQB_HIGH (PAGE_SHIFT + 			\
+				 ((9 <= (MAX_ORDER - 1)) ? 9 : (MAX_ORDER - 1)))
 
 extern struct kmem_cache kmalloc_caches[KMALLOC_SHIFT_SLQB_HIGH + 1];
 extern struct kmem_cache kmalloc_caches_dma[KMALLOC_SHIFT_SLQB_HIGH + 1];
@@ -172,10 +182,7 @@ extern struct kmem_cache kmalloc_caches_dma[KMALLOC_SHIFT_SLQB_HIGH + 1];
  */
 static __always_inline int kmalloc_index(size_t size)
 {
-	if (unlikely(!size))
-		return 0;
-	if (unlikely(size > 1UL << KMALLOC_SHIFT_SLQB_HIGH))
-		return 0;
+	extern int ____kmalloc_too_large(void);
 
 	if (unlikely(size <= KMALLOC_MIN_SIZE))
 		return KMALLOC_SHIFT_LOW;
@@ -207,7 +214,11 @@ static __always_inline int kmalloc_index(size_t size)
 	if (size <= 512 * 1024) return 19;
 	if (size <= 1024 * 1024) return 20;
 	if (size <=  2 * 1024 * 1024) return 21;
-	return -1;
+	if (size <=  4 * 1024 * 1024) return 22;
+	if (size <=  8 * 1024 * 1024) return 23;
+	if (size <=  16 * 1024 * 1024) return 24;
+	if (size <=  32 * 1024 * 1024) return 25;
+	return ____kmalloc_too_large();
 }
 
 #ifdef CONFIG_ZONE_DMA
@@ -219,15 +230,19 @@ static __always_inline int kmalloc_index(size_t size)
 
 /*
  * Find the kmalloc slab cache for a given combination of allocation flags and
- * size.
+ * size. Should really only be used for constant 'size' arguments, due to
+ * bloat.
  */
 static __always_inline struct kmem_cache *kmalloc_slab(size_t size, gfp_t flags)
 {
-	int index = kmalloc_index(size);
+	int index;
 
-	if (unlikely(index == 0))
+	if (unlikely(size > 1UL << KMALLOC_SHIFT_SLQB_HIGH))
 		return NULL;
+	if (unlikely(!size))
+		return ZERO_SIZE_PTR;
 
+	index = kmalloc_index(size);
 	if (likely(!(flags & SLQB_DMA)))
 		return &kmalloc_caches[index];
 	else
@@ -245,7 +260,8 @@ void *__kmalloc(size_t size, gfp_t flags);
 #define ARCH_SLAB_MINALIGN __alignof__(unsigned long long)
 #endif
 
-#define KMALLOC_HEADER (ARCH_KMALLOC_MINALIGN < sizeof(void *) ? sizeof(void *) : ARCH_KMALLOC_MINALIGN)
+#define KMALLOC_HEADER (ARCH_KMALLOC_MINALIGN < sizeof(void *) ?	\
+				sizeof(void *) : ARCH_KMALLOC_MINALIGN)
 
 static __always_inline void *kmalloc(size_t size, gfp_t flags)
 {
