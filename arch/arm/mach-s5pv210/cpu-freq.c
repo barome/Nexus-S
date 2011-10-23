@@ -52,7 +52,7 @@ static unsigned int apll_freq_max; /* in MHz */
 static DEFINE_MUTEX(set_freq_lock);
 
 /* UV */
-extern int exp_UV_mV[5];
+extern int exp_UV_mV[5]; 
 
 /* frequency */
 static struct cpufreq_frequency_table freq_table[] = {
@@ -157,7 +157,7 @@ static struct s3c_freq clk_info[] = {
 		.hclk_dsys  = 166750,
 		.pclk_dsys  = 83375,
 	},
-	[L4] = {	/* L5: 100MHz */
+	[L4] = {	/* L4: 100MHz */
 		.fclk       = 800000,
 		.armclk     = 100000,
 		.hclk_tns   = 0,
@@ -274,9 +274,8 @@ static void s5pv210_cpufreq_clksrcs_MPLL2APLL(unsigned int index,
 	unsigned int reg;
 
 #ifdef CONFIG_LIVE_OC
-  u32 apll_value;
+	u32 apll_value;
 #endif
-
 	/*
 	 * 1. Set Lock time = 30us*24MHz = 02cf
 	 */
@@ -286,18 +285,17 @@ static void s5pv210_cpufreq_clksrcs_MPLL2APLL(unsigned int index,
 	 * 2. Turn on APLL
 	 * 2-1. Set PMS values
 	 */
-
 #ifdef CONFIG_LIVE_OC
-  apll_value = ((1 << 31) | ((((clk_info[index].fclk / 1000) * dividers[index]) / 24) << 16) | (dividers[index] << 8) | (1));
+	apll_value = ((1 << 31) | ((((clk_info[index].fclk / 1000) * dividers[index]) / 24) << 16) | (dividers[index] << 8) | (1));
 
-  __raw_writel(apll_value, S5P_APLL_CON);
+	__raw_writel(apll_value, S5P_APLL_CON);
 #else
 	if (index == L0)
-    		/* APLL FOUT becomes 1000 Mhz */
-    		__raw_writel(PLL45XX_APLL_VAL_1000, S5P_APLL_CON);
-  	else
-    		/* APLL FOUT becomes 800 Mhz */
-    		__raw_writel(PLL45XX_APLL_VAL_800, S5P_APLL_CON);
+		/* APLL FOUT becomes 1000 Mhz */
+		__raw_writel(PLL45XX_APLL_VAL_1000, S5P_APLL_CON);
+	else
+		/* APLL FOUT becomes 800 Mhz */
+		__raw_writel(PLL45XX_APLL_VAL_800, S5P_APLL_CON);
 #endif
 	/* 2-2. Wait until the PLL is locked */
 	do {
@@ -363,7 +361,7 @@ static int s5pv210_cpufreq_target(struct cpufreq_policy *policy,
 
 #ifdef CONFIG_LIVE_OC
 	if (!mutex_trylock(&set_freq_lock))
-		goto no_lock;
+	    goto no_lock;
 #else
 	mutex_lock(&set_freq_lock);
 #endif
@@ -469,7 +467,7 @@ static int s5pv210_cpufreq_target(struct cpufreq_policy *policy,
 	 * Besides, we need to consider the case when PLL speed changes,
 	 * where the DMC1's source clock hclk_msys is changed from ARMCLK
 	 * to MPLL temporarily. DMC1 needs to be ready for this
-	 * transition as well.return cpufreq_frequency_table_cpuinfo(policy, freq_table);
+	 * transition as well.
 	 */
 	if (s3c_freqs.new.hclk_msys < s3c_freqs.old.hclk_msys || first_run) {
 		/*
@@ -608,7 +606,7 @@ static int s5pv210_cpufreq_target(struct cpufreq_policy *policy,
 out:
 	mutex_unlock(&set_freq_lock);
 #ifdef CONFIG_LIVE_OC
-	no_lock:
+no_lock:
 #endif
 	return ret;
 }
@@ -661,15 +659,15 @@ static int find_divider(int freq)
     divider = 24;
 
     if (freq % 3 == 0) {
-  freq /= 3;
-  divider /= 3;
+	freq /= 3;
+	divider /= 3;
     }
  
     for (i = 0; i < 3; i++) {
-  if (freq % 2 == 0) {
-      freq /= 2;
-      divider /= 2;
-  }
+	if (freq % 2 == 0) {
+	    freq /= 2;
+	    divider /= 2;
+	}
     }
 
     return divider;
@@ -682,14 +680,14 @@ static void liveoc_init(void)
     i = 0;
 
     while (freq_table[i].frequency != CPUFREQ_TABLE_END) {
-  index = freq_table[i].index;
+	index = freq_table[i].index;
 
-  original_fclk[index] = clk_info[index].fclk;
-  dividers[index] = find_divider(clk_info[index].fclk / 1000);
+	original_fclk[index] = clk_info[index].fclk;
+	dividers[index] = find_divider(clk_info[index].fclk / 1000);
 
-  sleep_freq = SLEEP_FREQ;
+	sleep_freq = SLEEP_FREQ;
 
-  i++;
+	i++;
     }
 
     return;
@@ -697,7 +695,7 @@ static void liveoc_init(void)
 
 void liveoc_update(unsigned int oc_value)
 {
-    int i, index, index_min = L0, index_max = L0;;
+    int i, index, index_min = L0, index_max = L0;
 
     struct cpufreq_policy * policy = cpufreq_cpu_get(0);
 
@@ -708,37 +706,38 @@ void liveoc_update(unsigned int oc_value)
 
     while (freq_table[i].frequency != CPUFREQ_TABLE_END) {
 
-  index = freq_table[i].index;
-  
-  if (clk_info[index].armclk == policy->user_policy.min)
-      index_min = index;
+	index = freq_table[i].index;
+	
+	if (clk_info[index].armclk == policy->user_policy.min)
+	    index_min = index;
 
-  if (clk_info[index].armclk == policy->user_policy.max)
-      index_max = index;
+	if (clk_info[index].armclk == policy->user_policy.max)
+	    index_max = index;
 
-  clk_info[index].fclk = (original_fclk[index] / 100) * oc_value;
-  dividers[index] = find_divider(clk_info[index].fclk / 1000);
+	clk_info[index].fclk = (original_fclk[index] / 100) * oc_value;
+	dividers[index] = find_divider(clk_info[index].fclk / 1000);
 
-  clk_info[index].armclk = clk_info[index].fclk / (clkdiv_val[index][0] + 1);
-  clk_info[index].hclk_msys = clk_info[index].fclk / (clkdiv_val[index][1] + 1);
-  clk_info[index].pclk_msys = clk_info[index].hclk_msys / (clkdiv_val[index][3] + 1);
+	clk_info[index].armclk = clk_info[index].fclk / (clkdiv_val[index][0] + 1);
+	clk_info[index].hclk_msys = clk_info[index].fclk / (clkdiv_val[index][1] + 1);
+	clk_info[index].pclk_msys = clk_info[index].hclk_msys / (clkdiv_val[index][3] + 1);
 
-  freq_table[i].frequency = clk_info[index].armclk;
+	freq_table[i].frequency = clk_info[index].armclk;
 
-  if (freq_table[i].frequency > apll_freq_max)
-      apll_freq_max = freq_table[i].frequency;
+	if (freq_table[i].frequency > apll_freq_max)
+	    apll_freq_max = freq_table[i].frequency;
 
-  if (original_fclk[index] / (clkdiv_val[index][0] + 1) == SLEEP_FREQ)
-      sleep_freq = clk_info[index].armclk;
+	if (original_fclk[index] / (clkdiv_val[index][0] + 1) == SLEEP_FREQ)
+	    sleep_freq = clk_info[index].armclk;
 
-  i++;
+	i++;
     }
 
     apll_freq_max /= 1000;
 
     cpufreq_frequency_table_cpuinfo(policy, freq_table);
+
     policy->user_policy.min = freq_table[index_min].frequency;
-    policy->user_policy.max = freq_table[index_max].frequency; 
+    policy->user_policy.max = freq_table[index_max].frequency;  
 
     cpufreq_stats_reset();
 
@@ -774,7 +773,7 @@ static int __init s5pv210_cpufreq_driver_init(struct cpufreq_policy *policy)
 
 	cpufreq_frequency_table_get_attr(freq_table, policy->cpu);
 
-	policy->cpuinfo.transition_latency = 40000;	/* 40us */
+	policy->cpuinfo.transition_latency = 40000;	/* 1us */
 
 	rate = clk_get_rate(mpu_clk);
 	i = 0;
@@ -789,9 +788,9 @@ static int __init s5pv210_cpufreq_driver_init(struct cpufreq_policy *policy)
 
 	if (level == CPUFREQ_TABLE_END) { /* Not found */
 		pr_err("[%s:%d] clock speed does not match: "
-				"%d. Using L4 of 800MHz.\n",
+				"%d. Using L1 of 800MHz.\n",
 				__FILE__, __LINE__, rate);
-		level = L4;
+		level = L1;
 	}
 
 	backup_dmc0_reg = __raw_readl(S5P_VA_DMC0 + 0x30) & 0xFFFF;
@@ -814,7 +813,7 @@ static int __init s5pv210_cpufreq_driver_init(struct cpufreq_policy *policy)
 	previous_arm_volt = exp_UV_mV[level];
 
 #ifdef CONFIG_LIVE_OC
-  	liveoc_init();
+	liveoc_init();
 #endif
 
 	return cpufreq_frequency_table_cpuinfo(policy, freq_table);
@@ -823,20 +822,21 @@ static int __init s5pv210_cpufreq_driver_init(struct cpufreq_policy *policy)
 static int s5pv210_cpufreq_notifier_event(struct notifier_block *this,
 		unsigned long event, void *ptr)
 {
-    static int max, min;
+	static int max, min;
 	int ret;
-    struct cpufreq_policy *policy = cpufreq_cpu_get(0);
+
+	struct cpufreq_policy *policy = cpufreq_cpu_get(0);
 
 	switch (event) {
 	case PM_SUSPEND_PREPARE:
-        max = policy->max;
-        min = policy->min;
+		max = policy->max;
+		min = policy->min;
 #ifdef CONFIG_LIVE_OC
-    	policy->max = policy->min = sleep_freq;
-    	ret = cpufreq_driver_target(policy, sleep_freq,
+		policy->max = policy->min = sleep_freq;
+		ret = cpufreq_driver_target(policy, sleep_freq,
 #else
-        policy->max = policy->min = SLEEP_FREQ;
-		ret = cpufreq_driver_target(cpufreq_cpu_get(0), SLEEP_FREQ,
+		policy->max = policy->min = SLEEP_FREQ;
+		ret = cpufreq_driver_target(policy, SLEEP_FREQ,
 #endif
 				DISABLE_FURTHER_CPUFREQ);
 		if (ret < 0)
@@ -845,17 +845,23 @@ static int s5pv210_cpufreq_notifier_event(struct notifier_block *this,
 	case PM_POST_RESTORE:
 	case PM_POST_SUSPEND:
 #ifdef CONFIG_LIVE_OC
-    	cpufreq_driver_target(policy, sleep_freq,
+		cpufreq_driver_target(policy, sleep_freq,
 #else
-		cpufreq_driver_target(cpufreq_cpu_get(0), SLEEP_FREQ,
+		cpufreq_driver_target(policy, SLEEP_FREQ,
 #endif
 				ENABLE_FURTHER_CPUFREQ);
-        policy->max = max;
-        policy->min = min;
+		policy->max = max;
+		policy->min = min;
 		return NOTIFY_OK;
 	}
 	return NOTIFY_DONE;
 }
+
+/* Make sure we have the scaling_available_freqs sysfs file */
+static struct freq_attr *netarchy_cpufreq_attr[] = {
+	&cpufreq_freq_attr_scaling_available_freqs,
+	NULL,
+};
 
 static struct cpufreq_driver s5pv210_cpufreq_driver = {
 	.flags		= CPUFREQ_STICKY,
@@ -864,7 +870,7 @@ static struct cpufreq_driver s5pv210_cpufreq_driver = {
 	.get		= s5pv210_cpufreq_getspeed,
 	.init		= s5pv210_cpufreq_driver_init,
 	.name		= "s5pv210",
-	.attr		= s5pv210_cpufreq_attr,
+	.attr		= netarchy_cpufreq_attr,
 #ifdef CONFIG_PM
 	.suspend	= s5pv210_cpufreq_suspend,
 	.resume		= s5pv210_cpufreq_resume,
