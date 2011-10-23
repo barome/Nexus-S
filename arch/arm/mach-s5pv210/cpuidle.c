@@ -28,14 +28,10 @@
 
 #ifdef CONFIG_CPU_DIDLE
 #include <linux/dma-mapping.h>
-#include <linux/deep_idle.h>
 
 #include <plat/regs-otg.h>
 #include <mach/cpuidle.h>
 #include <mach/power-domain.h>
-
-extern bool suspend_ongoing(void);
-extern bool bt_is_running(void);
 
 /*
  * For saving & restoring VIC register before entering
@@ -248,12 +244,11 @@ static void s5p_enter_didle(void)
 
 	/*
 	 * Configure external interrupt wakeup mask
-	 * We use the same wakeup mask as for sleep state plus make sure 
-	 * that at least XEINT[22] = GPH2[6] = GPIO_nPOWER = GPIO_N_POWER
+	 * Only XEINT[22] = GPH2[6] = GPIO_nPOWER = GPIO_N_POWER
 	 * and XEINT[29] = GPH3[5] = GPIO_OK_KEY are enabled
 	 */
 	save_eint_mask = __raw_readl(S5P_EINT_WAKEUP_MASK);
-	tmp = s3c_irqwake_eintmask;
+	tmp = 0xFFFFFFFF;
 	tmp &= ~((1<<22) | (1<<29));
 	__raw_writel(tmp, S5P_EINT_WAKEUP_MASK);
 
@@ -263,11 +258,10 @@ static void s5p_enter_didle(void)
 
 	/*
 	 * Wakeup source configuration for didle
-	 * We use the same wakeup mask as for sleep state plus make
-	 * sure that at least RTC TICK and I2S are enabled as wakeup 
-	 * sources
+	 * RTC TICK and I2S are enabled as wakeup sources
 	 */
-	tmp = s3c_irqwake_intmask;
+	tmp = __raw_readl(S5P_WAKEUP_MASK);
+	tmp |= 0xfe3e;
 	tmp &= ~((1<<2) | (1<<13));
 	__raw_writel(tmp, S5P_WAKEUP_MASK);
 
@@ -367,9 +361,9 @@ static int s5p_enter_idle_state(struct cpuidle_device *dev,
 
 #ifdef CONFIG_CPU_DIDLE
 #ifdef CONFIG_S5P_INTERNAL_DMA
-	if (!deepidle_is_enabled() || check_power_clock_gating() || suspend_ongoing() || bt_is_running() || loop_sdmmc_check() || check_usbotg_op() || check_rtcint() || check_idmapos()) {
+	if (check_power_clock_gating() || loop_sdmmc_check() || check_usbotg_op() || check_rtcint() || check_idmapos()) {
 #else
-	if (!deepidle_is_enabled() || check_power_clock_gating() || suspend_ongoing() || bt_is_running() || loop_sdmmc_check() || check_usbotg_op() || check_rtcint()) {
+	if (check_power_clock_gating() || loop_sdmmc_check() || check_usbotg_op() || check_rtcint()) {
 #endif
 	    s5p_enter_idle();
 	} else {
