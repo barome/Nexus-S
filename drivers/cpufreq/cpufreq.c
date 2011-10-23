@@ -649,7 +649,7 @@ static ssize_t show_UV_mV_table(struct cpufreq_policy *policy, char *buf) {
 	return sprintf(buf, "1440mhz: %d mV\n1300mhz: %d mV\n1200mhz: %d mV\n1000mhz: %d mV\n800mhz: %d mV\n400mhz: %d mV\n200mhz: %d mV\n100mhz: %d mV\n",
                         exp_UV_mV[0]/1000, exp_UV_mV[1]/1000, exp_UV_mV[2]/1000,
                         exp_UV_mV[3]/1000, exp_UV_mV[4]/1000, exp_UV_mV[5]/1000,
-                        exp_UV_mV[6]/1000, exp_UV_mV[7]/1000,
+                        exp_UV_mV[6]/1000, exp_UV_mV[7]/1000);
 }
 
 static ssize_t store_UV_mV_table(struct cpufreq_policy *policy,
@@ -657,7 +657,7 @@ static ssize_t store_UV_mV_table(struct cpufreq_policy *policy,
 
 	unsigned int ret = -EINVAL;
 	int i = 0;
-	ret = sscanf(buf, "%d %d %d %d %d %d %d %d %d",
+	ret = sscanf(buf, "%d %d %d %d %d %d %d %d",
                 &exp_UV_mV[0], &exp_UV_mV[1], &exp_UV_mV[2],
                 &exp_UV_mV[3], &exp_UV_mV[4], &exp_UV_mV[5],
                 &exp_UV_mV[6], &exp_UV_mV[7]);
