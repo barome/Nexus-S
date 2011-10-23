@@ -557,7 +557,7 @@ static int s5pv210_cpufreq_target(struct cpufreq_policy *policy,
 		s5pv210_cpufreq_clksrcs_APLL2MPLL(index, bus_speed_changing);
 
 	/* ARM MCS value changed */
-	if (index <= L6) {
+	if (index <= L5) {
 		reg = __raw_readl(S5P_ARM_MCS_CON);
 		reg &= ~0x3;
 		reg |= 0x1;
@@ -587,7 +587,7 @@ static int s5pv210_cpufreq_target(struct cpufreq_policy *policy,
 	} while (reg & 0xff);
 
 	/* ARM MCS value changed */
-	if (index > L6) {
+	if (index > L5) {
 		reg = __raw_readl(S5P_ARM_MCS_CON);
 		reg &= ~0x3;
 		reg |= 0x3;
@@ -682,9 +682,9 @@ static int s5pv210_cpufreq_resume(struct cpufreq_policy *policy)
 
 	if (level == CPUFREQ_TABLE_END) { /* Not found */
 		pr_err("[%s:%d] clock speed does not match: "
-				"%d. Using L5 of 800MHz.\n",
+				"%d. Using L4 of 800MHz.\n",
 				__FILE__, __LINE__, rate);
-		level = L5;
+		level = L4;
 	}
 
 	memcpy(&s3c_freqs.old, &clk_info[level],
@@ -735,9 +735,9 @@ static int __init s5pv210_cpufreq_driver_init(struct cpufreq_policy *policy)
 
 	if (level == CPUFREQ_TABLE_END) { /* Not found */
 		pr_err("[%s:%d] clock speed does not match: "
-				"%d. Using L5 of 800MHz.\n",
+				"%d. Using L4 of 800MHz.\n",
 				__FILE__, __LINE__, rate);
-		level = L5;
+		level = L4;
 	}
 
 	backup_dmc0_reg = __raw_readl(S5P_VA_DMC0 + 0x30) & 0xFFFF;
@@ -762,7 +762,7 @@ static int __init s5pv210_cpufreq_driver_init(struct cpufreq_policy *policy)
 	cpufreq_frequency_table_cpuinfo(policy, freq_table);
 	/* set default min and max policies to safe speeds */
 	policy->max = 1000000;
-	policy->min = 100000;
+	policy->min = 400000;
 	return 0;
 }
 
