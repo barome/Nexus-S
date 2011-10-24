@@ -416,8 +416,13 @@ static void s3c_bat_discharge_reason(struct chg_data *chg)
 		chg->bat_info.dis_reason |= DISCONNECT_BAT_FULL;
 
 #ifdef CONFIG_BLX
+<<<<<<< HEAD
 if (chg->bat_info.batt_soc >= get_charginglimit())
 	{
+=======
+	if (get_charginglimit() != MAX_CHARGINGLIMIT && chg->bat_info.batt_soc >= get_charginglimit())
+	    {
+>>>>>>> 9e01cf3... 1. Made BLX compatible with the 100% charging 'fix'.
 		chg->bat_info.dis_reason |= DISCONNECT_BAT_FULL;
 
 		chg->bat_info.batt_is_full = true;
