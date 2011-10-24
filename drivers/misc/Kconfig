@@ -490,18 +490,16 @@ config TOUCH_WAKE
        help
          Say Y here to enable touch wake
 
-<<<<<<< HEAD
 config LIVE_OC
        bool "Support for Live OC"
        default y
        help
          Say Y here to enable Live OC
-=======
+
 config BLX
        bool "Support for Battery Life eXtender"
        default y
        help
          Say Y here to enable Battery Life eXtender
->>>>>>> parent of 503d8b4... Revert BLX from kernel
 
 endif # MISC_DEVICES
