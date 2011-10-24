@@ -416,17 +416,12 @@ static void s3c_bat_discharge_reason(struct chg_data *chg)
 		chg->bat_info.dis_reason |= DISCONNECT_BAT_FULL;
 
 #ifdef CONFIG_BLX
-	if (chg->bat_info.batt_soc >= get_charginglimit())
-	    {
-<<<<<<< HEAD
-    		chg->bat_info.dis_reason |= DISCONNECT_BAT_FULL;
-            chg->bat_info.batt_is_full = true;
-=======
+if (chg->bat_info.batt_soc >= get_charginglimit())
+	{
 		chg->bat_info.dis_reason |= DISCONNECT_BAT_FULL;
 
 		chg->bat_info.batt_is_full = true;
->>>>>>> 22adb99... The battery status is set to 'full' once the user defined charging
-	    }
+	}
 #endif
 
 	if (chg->bat_info.batt_health != POWER_SUPPLY_HEALTH_GOOD)
