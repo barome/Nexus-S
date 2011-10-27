@@ -32,6 +32,7 @@
 #include <linux/init.h>
 #include <linux/uaccess.h>
 #include <linux/highmem.h>
+#include <linux/smp_lock.h>
 #include <asm/mmu_context.h>
 #include <linux/interrupt.h>
 #include <linux/capability.h>
@@ -3900,6 +3901,9 @@ need_resched:
 	prev = rq->curr;
 	switch_count = &prev->nivcsw;
 
+	release_kernel_lock(prev);
+need_resched_nonpreemptible:
+
 	schedule_debug(prev);
 
 	if (sched_feat(HRTICK))
@@ -3944,6 +3948,12 @@ need_resched:
 		raw_spin_unlock_irq(&rq->lock);
 
 	post_schedule(rq);
+
+	if (unlikely(reacquire_kernel_lock(current) < 0)) {
+		prev = rq->curr;
+		switch_count = &prev->nivcsw;
+		goto need_resched_nonpreemptible;
+	}
 
 	preempt_enable_no_resched();
 	if (need_resched())
@@ -7994,7 +8004,7 @@ static inline int preempt_count_equals(int preempt_offset)
 {
 	int nested = (preempt_count() & ~PREEMPT_ACTIVE) + rcu_preempt_depth();
 
-	return (nested == preempt_offset);
+	return (nested == PREEMPT_INATOMIC_BASE + preempt_offset);
 }
 
 static int __might_sleep_init_called;
