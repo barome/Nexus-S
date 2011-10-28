@@ -38,9 +38,9 @@
 #define SCHED_BATCH		3
 /* SCHED_ISO: Implemented on BFS only */
 #define SCHED_IDLE    5
-#define SCHED_IDLEPRIO    SCHED_IDLE
 #ifdef CONFIG_SCHED_BFS
 #define SCHED_ISO    4
+#define SCHED_IDLEPRIO    SCHED_IDLE
 #define SCHED_MAX    (SCHED_IDLEPRIO)
 #define SCHED_RANGE(policy)  ((policy) <= SCHED_MAX)
 #endif
@@ -1574,7 +1574,6 @@ static inline bool iso_task(struct task_struct *p)
 }
 
 extern void remove_cpu(int cpu);
-extern bool above_background_load(void);
 
 #else /* CFS */
 extern int runqueue_is_locked(int cpu);
@@ -1614,11 +1613,6 @@ static inline bool iso_task(struct task_struct *p)
 
 static inline void remove_cpu(int cpu)
 {
-}
-/* Anyone feel like implementing this? */
-static inline int above_background_load(void)
-{
-  	return 1;
 }
 #endif /* CONFIG_SCHED_BFS */
 
