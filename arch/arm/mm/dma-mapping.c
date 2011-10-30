@@ -310,8 +310,6 @@ __dma_alloc(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gfp,
 void *
 dma_alloc_coherent(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gfp)
 {
-	void *memory;
-
 	if (dma_alloc_from_coherent(dev, size, handle, &memory))
 		return memory;
 
