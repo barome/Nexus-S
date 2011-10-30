@@ -688,12 +688,10 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 
 	    __cpufreq_driver_target(policy, policy->max,
 				    CPUFREQ_RELATION_H);
-	}
-	else if (policy->cur < policy->max) {
+	else if (policy->cur < policy->max)
 			this_dbs_info->rate_mult =
 				dbs_tuners_ins.sampling_down_factor;
-		 __cpufreq_driver_target(policy, policy->max,
-				    CPUFREQ_RELATION_H);
+		dbs_freq_increase(policy, policy->max);
 	} else {
 	    int freq = powersave_bias_target(policy, policy->max,
 					     CPUFREQ_RELATION_H);
