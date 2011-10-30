@@ -47,20 +47,22 @@ static int lowmem_adj[6] = {
 };
 static int lowmem_adj_size = 4;
 static size_t lowmem_minfree[6] = {
-	3 * 512,	/* 6MB */
-	2 * 1024,	/* 8MB */
-	4 * 1024,	/* 16MB */
-	16 * 1024,	/* 64MB */
-};
-static int lowmem_minfree_size = 4;
-
-static size_t lowmem_minfile[6] = {
 	1536,
 	2304,
 	4096,
 	17920,
 	19456,
 	41472
+};
+static int lowmem_minfree_size = 6;
+
+static size_t lowmem_minfile[6] = {
+	1536,
+	2048,
+	4096,
+	5120,
+	5632,
+	6144
 };
 static int lowmem_minfile_size = 6;
 
