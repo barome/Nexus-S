@@ -37,13 +37,18 @@
 #define SCHED_RR		2
 #define SCHED_BATCH		3
 /* SCHED_ISO: Implemented on BFS only */
-#define SCHED_IDLE    5
-#ifdef CONFIG_SCHED_BFS
-#define SCHED_ISO    4
+#define SCHED_IDLE		5
+<<<<<<< HEAD
 #define SCHED_IDLEPRIO    SCHED_IDLE
-#define SCHED_MAX    (SCHED_IDLEPRIO)
-#define SCHED_RANGE(policy)  ((policy) <= SCHED_MAX)
+=======
+#ifdef CONFIG_SCHED_BFS
+#define SCHED_ISO		4
+#define SCHED_IDLEPRIO		SCHED_IDLE
+#define SCHED_MAX		(SCHED_IDLEPRIO)
+#define SCHED_RANGE(policy)	((policy) <= SCHED_MAX)
 #endif
+
+>>>>>>> caef592... Added BFS CPU scheduler v0.404 by Con Kolivas.
 /* Can be ORed in to make sure the process is reverted back to SCHED_NORMAL on fork */
 #define SCHED_RESET_ON_FORK     0x40000000
 
