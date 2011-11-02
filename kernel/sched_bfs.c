@@ -120,7 +120,7 @@
 #define NS_TO_MS(TIME)		((TIME) >> 20)
 #define NS_TO_US(TIME)		((TIME) >> 10)
 
-#define RESCHED_US	(100) /* Reschedule if less than this many Î¼s left */
+#define RESCHED_US	(100) /* Reschedule if less than this many μs left */
 
 /*
  * This is the time all tasks within the same priority round robin.
@@ -556,6 +556,8 @@ static inline void __task_grq_unlock(void)
 	grq_unlock();
 }
 
+<<<<<<< HEAD
+=======
 /*
  * Look for any tasks *anywhere* that are running nice 0 or better. We do
  * this lockless for overhead reasons since the occasional wrong result
@@ -576,6 +578,7 @@ bool above_background_load(void)
 	return 0;
 }
 
+>>>>>>> 0d5efbe... Update BFS to V413 for kernel 3.0 - modified for DHD by LorD ClockaN
 #ifndef __ARCH_WANT_UNLOCKED_CTXSW
 static inline void prepare_lock_switch(struct rq *rq, struct task_struct *next)
 {
@@ -1488,7 +1491,7 @@ static bool try_to_wake_up(struct task_struct *p, unsigned int state,
 
 	get_cpu();
 
-	/* This barrier is undocumented, probably for p->state? ãã */
+	/* This barrier is undocumented, probably for p->state? くそ */
 	smp_wmb();
 
 	/*
@@ -1497,7 +1500,7 @@ static bool try_to_wake_up(struct task_struct *p, unsigned int state,
 	 */
 	rq = task_grq_lock(p, &flags);
 
-	/* state is a volatile long, ã©ã†ã—ã¦ã€åˆ†ã‹ã‚‰ãªã„ */
+	/* state is a volatile long, どうして、分からない */
 	if (!((unsigned int)p->state & state))
 		goto out_unlock;
 
@@ -2606,7 +2609,7 @@ static void task_running_tick(struct rq *rq)
 	 * Tasks that were scheduled in the first half of a tick are not
 	 * allowed to run into the 2nd half of the next tick if they will
 	 * run out of time slice in the interim. Otherwise, if they have
-	 * less than RESCHED_US Î¼s of time slice left they will be rescheduled.
+	 * less than RESCHED_US μs of time slice left they will be rescheduled.
 	 */
 	if (rq->dither) {
 		if (rq->rq_time_slice > HALF_JIFFY_US)
@@ -3909,11 +3912,6 @@ recheck:
 				case SCHED_BATCH:
 					if (policy == SCHED_BATCH)
 						goto out;
-					/*
-					*ANDROID: Allow tasks to move between
-					*/
-					if (policy == SCHED_NORMAL)
-					break;
 					if (policy != SCHED_IDLEPRIO)
 						return -EPERM;
 					break;
@@ -4318,7 +4316,7 @@ static inline bool should_resched(void)
 
 static void __cond_resched(void)
 {
-	/* NOT a real fix but will make voluntary preempt work. é¦¬é¹¿ãªäº‹ */
+	/* NOT a real fix but will make voluntary preempt work. 馬鹿な事 */
 	if (unlikely(system_state != SYSTEM_RUNNING))
 		return;
 
@@ -7297,7 +7295,7 @@ void proc_sched_set_task(struct task_struct *p)
 {}
 #endif
 
-/* No RCU torture test support 
+/* No RCU torture test support */
 void synchronize_sched_expedited(void)
 {
 	barrier();
@@ -7320,4 +7318,3 @@ unsigned long default_scale_smt_power(struct sched_domain *sd, int cpu)
 	return smt_gain;
 }
 #endif
-*/
