@@ -762,67 +762,6 @@ static int configure_clock(struct snd_soc_codec *codec)
 	return 0;
 }
 
-static int wm8994_set_bias_level(struct snd_soc_codec *codec,
-				 enum snd_soc_bias_level level)
-{
-	DEBUG_LOG("");
-
-	switch (level) {
-	case SND_SOC_BIAS_ON:
-	case SND_SOC_BIAS_PREPARE:
-		/* VMID=2*40k */
-		snd_soc_update_bits(codec, WM8994_POWER_MANAGEMENT_1,
-				    WM8994_VMID_SEL_MASK, 0x2);
-		snd_soc_update_bits(codec, WM8994_POWER_MANAGEMENT_2,
-				    WM8994_TSHUT_ENA, WM8994_TSHUT_ENA);
-		break;
-
-	case SND_SOC_BIAS_STANDBY:
-		if (codec->bias_level == SND_SOC_BIAS_OFF) {
-			/* Bring up VMID with fast soft start */
-			snd_soc_update_bits(codec, WM8994_ANTIPOP_2,
-					    WM8994_STARTUP_BIAS_ENA |
-					    WM8994_VMID_BUF_ENA |
-					    WM8994_VMID_RAMP_MASK |
-					    WM8994_BIAS_SRC,
-					    WM8994_STARTUP_BIAS_ENA |
-					    WM8994_VMID_BUF_ENA |
-					    WM8994_VMID_RAMP_MASK |
-					    WM8994_BIAS_SRC);
-			/* VMID=2*40k */
-			snd_soc_update_bits(codec, WM8994_POWER_MANAGEMENT_1,
-					    WM8994_VMID_SEL_MASK |
-					    WM8994_BIAS_ENA,
-					    WM8994_BIAS_ENA | 0x2);
-
-			/* Switch to normal bias */
-			snd_soc_update_bits(codec, WM8994_ANTIPOP_2,
-					    WM8994_BIAS_SRC |
-					    WM8994_STARTUP_BIAS_ENA, 0);
-		}
-
-		/* VMID=2*240k */
-		snd_soc_update_bits(codec, WM8994_POWER_MANAGEMENT_1,
-				    WM8994_VMID_SEL_MASK, 0x4);
-
-		snd_soc_update_bits(codec, WM8994_POWER_MANAGEMENT_2,
-				    WM8994_TSHUT_ENA, 0);
-		break;
-
-	case SND_SOC_BIAS_OFF:
-		snd_soc_update_bits(codec, WM8994_ANTIPOP_1,
-				    WM8994_LINEOUT_VMID_BUF_ENA, 0);
-
-		snd_soc_update_bits(codec, WM8994_POWER_MANAGEMENT_1,
-				    WM8994_VMID_SEL_MASK | WM8994_BIAS_ENA, 0);
-		break;
-	}
-
-	codec->bias_level = level;
-
-	return 0;
-}
-
 static int wm8994_set_sysclk(struct snd_soc_dai *codec_dai,
 			     int clk_id, unsigned int freq, int dir)
 {
@@ -1078,33 +1017,6 @@ static int wm8994_hw_params(struct snd_pcm_substream *substream,
 
 	wm8994_write(codec, WM8994_AIF1_RATE, clocking3);
 	wm8994_write(codec, WM8994_AIF1_CONTROL_1, aif1);
-
-	return 0;
-}
-
-static int wm8994_digital_mute(struct snd_soc_dai *codec_dai, int mute)
-{
-	struct snd_soc_codec *codec = codec_dai->codec;
-	int mute_reg;
-	int reg;
-
-	switch (codec_dai->id) {
-	case 1:
-		mute_reg = WM8994_AIF1_DAC1_FILTERS_1;
-		break;
-	case 2:
-		mute_reg = WM8994_AIF2_DAC_FILTERS_1;
-		break;
-	default:
-		return -EINVAL;
-	}
-
-	if (mute)
-		reg = WM8994_AIF1DAC1_MUTE;
-	else
-		reg = 0;
-
-	snd_soc_update_bits(codec, mute_reg, WM8994_AIF1DAC1_MUTE, reg);
 
 	return 0;
 }
@@ -3080,10 +2992,6 @@ static int wm8994_add_i2c_device(struct platform_device *pdev,
 	}
 
 	return 0;
-
-err_driver:
-	i2c_del_driver(&wm8994_i2c_driver);
-	return -ENODEV;
 }
 #endif
 
