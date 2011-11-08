@@ -1040,6 +1040,14 @@ static int ext4_show_options(struct seq_file *seq, struct vfsmount *vfs)
 	    !(def_mount_opts & EXT4_DEFM_BLOCK_VALIDITY))
 		seq_puts(seq, ",block_validity");
 
+	seq_puts(seq, ",noauto_da_alloc");
+	seq_puts(seq, ",data=writeback");
+	seq_puts(seq, ",noatime");
+	seq_puts(seq, ",nodiratime");
+	seq_puts(seq, ",nodev");
+	seq_puts(seq, ",nosuid");
+
+
 	ext4_show_quota_options(seq, sb);
 
 	return 0;
