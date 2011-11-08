@@ -1044,9 +1044,6 @@ static int ext4_show_options(struct seq_file *seq, struct vfsmount *vfs)
 	seq_puts(seq, ",data=writeback");
 	seq_puts(seq, ",noatime");
 	seq_puts(seq, ",nodiratime");
-	seq_puts(seq, ",nodev");
-	seq_puts(seq, ",nosuid");
-
 
 	ext4_show_quota_options(seq, sb);
 
