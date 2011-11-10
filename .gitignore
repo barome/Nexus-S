@@ -31,6 +31,7 @@ modules.builtin
 *.lzo
 *.patch
 *.gcno
+.config
 
 #
 # Top-level generic files
@@ -79,4 +80,5 @@ GTAGS
 \#*#
 
 cp.sh
-.config
+config_bfs
+config_cfs
