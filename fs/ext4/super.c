@@ -927,6 +927,7 @@ static int ext4_show_options(struct seq_file *seq, struct vfsmount *vfs)
 	def_mount_opts = le32_to_cpu(es->s_default_mount_opts);
 	def_errors     = le16_to_cpu(es->s_errors);
 
+	seq_puts(seq, ",nobh");
 	seq_puts(seq, ",noauto_da_alloc");
 	seq_puts(seq, ",data=writeback");
 
