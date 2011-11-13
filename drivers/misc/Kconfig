@@ -478,12 +478,6 @@ config BLD
        help
          Say Y here to enable the backlight dimmer
 
-config SCREEN_DIMMER
-       bool "Support for screen dimmer"
-       default y
-       help
-         Say Y here to enable the screen dimmer
-
 config TOUCH_WAKE
        bool "Support for touch wake"
        default y
