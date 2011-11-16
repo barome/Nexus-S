@@ -250,8 +250,16 @@ static void s5p_enter_didle(bool top_on)
 	    s5p_gpio_pdn_conf();
 	}
 
+	/*
+	 * Configure external interrupt wakeup mask
+	 * We use the same wakeup mask as for sleep state plus make sure 
+	 * that at least XEINT[22] = GPH2[6] = GPIO_nPOWER = GPIO_N_POWER
+	 * and XEINT[29] = GPH3[5] = GPIO_OK_KEY are enabled
+	 */
 	save_eint_mask = __raw_readl(S5P_EINT_WAKEUP_MASK);
-	__raw_writel(0xDFBFFFFF, S5P_EINT_WAKEUP_MASK);
+	tmp = s3c_irqwake_eintmask;
+	tmp &= ~((1<<22) | (1<<29));
+	__raw_writel(tmp, S5P_EINT_WAKEUP_MASK);
 
 	/* Clear wakeup status register */
 	tmp = __raw_readl(S5P_WAKEUP_STAT);
@@ -259,11 +267,12 @@ static void s5p_enter_didle(bool top_on)
 
 	/*
 	 * Wakeup source configuration for didle
-	 * RTC TICK and I2S are enabled as wakeup sources
+	 * We use the same wakeup mask as for sleep state plus make
+	 * sure that at least RTC ALARM, RTC TICK, KEY, I2S and ST are
+	 * enabled as wakeup sources
 	 */
-	tmp = __raw_readl(S5P_WAKEUP_MASK);
-  	tmp |= 0xffff;
-  	tmp &= ~((1<<2) | (1<<13));
+	tmp = s3c_irqwake_intmask;
+	tmp &= ~((1<<1) | (1<<2) | (1<<5) | (1<<13) | (1<<14));
 	__raw_writel(tmp, S5P_WAKEUP_MASK);
 
 	tmp = __raw_readl(S5P_IDLE_CFG);
