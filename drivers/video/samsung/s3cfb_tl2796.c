@@ -36,10 +36,6 @@
 #define VOODOO_COLOR_VERSION 2
 #endif
 
-#ifdef CONFIG_SCREEN_DIMMER
-#include <linux/screen_dimmer.h>
-#endif
-
 #define SLEEPMSEC		0x1000
 #define ENDDEF			0x2000
 #define DEFMASK		0xFF00
@@ -75,17 +71,13 @@ struct s5p_lcd{
 	struct dentry *debug_dir;
 };
 
-#ifdef CONFIG_SCREEN_DIMMER
-static struct s5p_lcd * screendimmer_lcd;
-#endif
-
 #ifdef CONFIG_FB_VOODOO
 struct s5p_lcd *lcd_;
 
 u32 original_color_adj_mults[3];
 unsigned int panel_config_sequence = 0;
 
-int hacky_v1_offset[3] = {-14, -17, -18};
+int hacky_v1_offset[3] = {-26, -30, -33};
 
 static const u16 s6e63m0_SEQ_ETC_SETTING_SAMSUNG[] = {
 	/* ETC Condition Set Command  */
