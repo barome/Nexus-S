@@ -66,7 +66,7 @@ static struct check_device_op chk_dev_op[] = {
 #if defined(CONFIG_S3C_DEV_HSMMC1)
 	{.base = 0, .pdev = &s3c_device_hsmmc1},
 #endif
-#if defined(CONFIG_S3C_DEV_HSMMC2)
+#if 0
 	{.base = 0, .pdev = &s3c_device_hsmmc2},
 #endif
 #if defined(CONFIG_S3C_DEV_HSMMC3)
@@ -205,6 +205,7 @@ static int check_rtcint(void)
 #define GPIO_PUD_OFFSET		0x08
 
 static unsigned int pud_pdn[(S5PV210_MP28_BASE - S5PV210_GPA0_BASE) / GPIO_OFFSET + 1];
+static unsigned int con_pdn[(S5PV210_MP28_BASE - S5PV210_GPA0_BASE) / GPIO_OFFSET + 1];
 
 static void s5p_gpio_pdn_conf(void)
 {
@@ -213,6 +214,8 @@ static void s5p_gpio_pdn_conf(void)
 	int i = 0;
 
 	do {
+		/* Save power down control state */
+		con_pdn[i] = __raw_readl(gpio_base + GPIO_CON_PDN_OFFSET);
 		/* Keep the previous state in didle mode */
 		__raw_writel(0xffff, gpio_base + GPIO_CON_PDN_OFFSET);
 
@@ -236,8 +239,8 @@ static void s5p_gpio_restore_conf(void)
 	int i = 0;
 
 	do {
-		/* Keep the previous state in didle mode */
-		__raw_writel(0xffff, gpio_base + GPIO_CON_PDN_OFFSET);
+		/* Restore power down control state */
+		__raw_writel(con_pdn[i], gpio_base + GPIO_CON_PDN_OFFSET);
 
 		/* Restore power down pull up-down state */
 		__raw_writel(pud_pdn[i], gpio_base + GPIO_PUD_PDN_OFFSET);
@@ -418,12 +421,12 @@ static int s5p_enter_idle_state(struct cpuidle_device *dev,
 
 #ifdef CONFIG_CPU_DIDLE
 #ifdef CONFIG_S5P_INTERNAL_DMA
-	if (!deepidle_is_enabled() || check_power_clock_gating() || suspend_ongoing() || check_usbotg_op() || check_rtcint() || check_idmapos()) {
+	if (!deepidle_is_enabled() || check_power_clock_gating() || suspend_ongoing() || loop_sdmmc_check() || check_usbotg_op() || check_rtcint() || check_idmapos()) {
 #else
-	if (!deepidle_is_enabled() || check_power_clock_gating() || suspend_ongoing() || check_usbotg_op() || check_rtcint()) {
+	if (!deepidle_is_enabled() || check_power_clock_gating() || suspend_ongoing() || loop_sdmmc_check() || check_usbotg_op() || check_rtcint()) {
 #endif
 	    s5p_enter_idle();
-	} else if (loop_sdmmc_check() || bt_is_running() || gps_is_running() || vibrator_is_running()) {
+	} else if (bt_is_running() || gps_is_running() || vibrator_is_running()) {
 	    s5p_enter_didle(true);
 	    idle_state = 1;
 	} else {
