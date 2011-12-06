@@ -332,12 +332,12 @@ CHECK		= sparse
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 		  -Wbitwise -Wno-return-void $(CF)
-MODFLAGS	= -DMODULE -finline-functions -funswitch-loops -fpredictive-commoning -fipa-cp-clone -ffast-math -fsingle-precision-constant -pipe
+MODFLAGS	= -DMODULE -mcpu=cortex-a8 -mfpu=vfpv3 -pipe -Wno-error=unused-but-set-variable -Wno-error=array-bounds
 CFLAGS_MODULE   = $(MODFLAGS)
 AFLAGS_MODULE   = $(MODFLAGS)
 LDFLAGS_MODULE  = -T $(srctree)/scripts/module-common.lds
-CFLAGS_KERNEL	= -finline-functions -funswitch-loops -fpredictive-commoning -fipa-cp-clone -ffast-math -fsingle-precision-constant -pipe
-AFLAGS_KERNEL	=
+CFLAGS_KERNEL	= -mcpu=cortex-a8 -mfpu=vfpv3 -pipe -Wno-error=unused-but-set-variable -Wno-error=array-bounds -flto -fuse-linker-plugin
+AFLAGS_KERNEL	= -mcpu=cortex-a8 -mfpu=vfpv3 -pipe -Wno-error=unused-but-set-variable -Wno-error=array-bounds -flto -fuse-linker-plugin
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
 
 
@@ -353,10 +353,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
-		   -fno-delete-null-pointer-checks \
-		   -mfpu=neon \
-		   -march=armv5te \
-       		   -mtune=cortex-a8
+		   -fno-delete-null-pointer-checks
 
 KBUILD_AFLAGS   := -D__ASSEMBLY__
 
