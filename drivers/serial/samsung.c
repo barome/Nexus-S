@@ -473,21 +473,21 @@ static void s3c24xx_serial_pm(struct uart_port *port, unsigned int level,
 
 		if (!IS_ERR(ourport->baudclk) && ourport->baudclk != NULL)
 			clk_disable(ourport->baudclk);
-
-		clk_disable(ourport->clk);
 #ifdef CONFIG_CPU_DIDLE
 		if (ourport->port.irq == IRQ_S3CUART_RX1) 
 		    gps_running = false;
 #endif
+		clk_disable(ourport->clk);
+
 		break;
 
 	case 0:
+
+		clk_enable(ourport->clk);
 #ifdef CONFIG_CPU_DIDLE
 		if (ourport->port.irq == IRQ_S3CUART_RX1)
 		    gps_running = true;
 #endif
-		clk_enable(ourport->clk);
-
 		if (!IS_ERR(ourport->baudclk) && ourport->baudclk != NULL)
 			clk_enable(ourport->baudclk);
 
